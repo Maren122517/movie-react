@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import SearchBar from './components/SearchBar';
+import ShowList from './components/showList';
+import ShowDetail from './components/showDetail';
+import Error from './components/error';
 
-function App() {
+const App = () => {
+  const [shows, setShows] = useState([]);
+  const [selectedShow, setSelectedShow] = useState(null);
+  const [error, setError] = useState('');
+
+  const handleSearch = async (query) => {
+    try {
+      const response = await fetch(`https://api.tvmaze.com/search/shows?q=${query}`);
+      const data = await response.json();
+      setShows(data.map(result => result.show));
+      setError('');
+    } catch (error) {
+      setError('Failed to fetch shows');
+    }
+  };
+
+  const handleShowSelect = (show) => {
+    setSelectedShow(show);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <SearchBar onSearch={handleSearch} />
+      {error && <Error message={error} />}
+      <ShowList shows={shows} onShowSelect={handleShowSelect} />
+      <ShowDetail show={selectedShow} />
     </div>
   );
-}
+};
 
 export default App;
